@@ -7,8 +7,16 @@
 #include <array>
 #include <vector>
 #include <Windows.h>
+#include <fstream>
 #undef min
 #undef max
+
+HINSTANCE inst = nullptr;
+HHOOK kbh = nullptr;
+bool hookedKB = false;
+DWORD tID;
+HANDLE th = INVALID_HANDLE_VALUE;
+DWORD WINAPI pump(LPVOID lp);
 
 constexpr auto AHUD_PostRender_index = 214;
 
@@ -362,6 +370,16 @@ void hook_AHUD_PostRender(AHUD *hud)
 {
 	draw_display(hud->Canvas);
 	orig_AHUD_PostRender(hud);
+
+	if (th == INVALID_HANDLE_VALUE) {
+		HANDLE ev = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		th = CreateThread(nullptr, 0, pump, &ev, 0, &tID);
+		WaitForSingleObject(ev, INFINITE);
+		CloseHandle(ev);
+		CloseHandle(th);
+	}
+
+	PostThreadMessage(tID, WM_USER, 0, 0);
 }
 
 const void *vtable_hook(const void **vtable, const int index, const void *hook)
@@ -372,6 +390,31 @@ const void *vtable_hook(const void **vtable, const int index, const void *hook)
 	vtable[index] = hook;
 	VirtualProtect(&vtable[index], sizeof(void*), old_protect, &old_protect);
 	return orig;
+}
+
+LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
+	if (nCode >= HC_ACTION && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
+		KBDLLHOOKSTRUCT k = *(KBDLLHOOKSTRUCT*)lParam;
+
+		switch (k.vkCode) {
+		case VK_F1:
+			FreeLibraryAndExitThread(inst, 0);
+			break;
+		case VK_F2:
+			std::ofstream f("hitboxesaddrs.log");
+			auto gs = (*GWorld)->GameState;
+			f << "GameState: " << gs << "\n";
+			auto engine = asw_engine::get();
+			f << "Engine: " << engine << "\n";
+			auto scene = asw_scene::get();
+			f << "Scene: " << scene << "\n";
+			auto ents = engine->entity_count;
+			f << "Entity count: " << ents << "\n";
+			f << "&ent[0]: " << &engine->entities[0] << "\n";
+			break;
+		}
+	}
+	return CallNextHookEx(kbh, nCode, wParam, lParam);
 }
 
 void install_hooks()
@@ -385,16 +428,35 @@ void uninstall_hooks()
 {
 	// AHUD::PostRender
 	vtable_hook(AHUD_vtable, AHUD_PostRender_index, orig_AHUD_PostRender);
+	if (kbh) UnhookWindowsHookEx(kbh);
 }
 
-BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, void *reserved)
-{
-	if (reason == DLL_PROCESS_ATTACH)
-		install_hooks();
-	else if (reason == DLL_PROCESS_DETACH)
-		uninstall_hooks();
-	else
-		return false;
+DWORD WINAPI pump(LPVOID lp) {
+	MSG msg;
+	//PeekMessage(&msg, 0, 0, 0, PM_NOREMOVE);
+	SetEvent(*(HANDLE*)lp);
+
+	while (GetMessage(&msg, nullptr, 0, 0) > 0) {
+		switch (msg.message) {
+		case WM_USER:
+			if (!hookedKB) {
+				hookedKB = true;
+				kbh = SetWindowsHookEx(WH_KEYBOARD_LL, KPLL, inst, 0);
+			}
+			break;
+		}
+	}
+
+	return 0;
+}
+
+BOOL WINAPI DllMain(HINSTANCE inst_, DWORD reason, void *reserved) {
+	inst = inst_;
+	if (failedScan) return false;
+	if (reason == DLL_PROCESS_ATTACH) install_hooks();
+	else if (reason == DLL_PROCESS_DETACH) uninstall_hooks();
+	else return false;
+
 
 	return true;
 }
