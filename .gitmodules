@@ -1,3 +1,0 @@
-[submodule "striveinjector/cpp-httplib"]
-	path = striveinjector/cpp-httplib
-	url = https://github.com/yhirose/cpp-httplib

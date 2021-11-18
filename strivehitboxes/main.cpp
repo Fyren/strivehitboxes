@@ -457,6 +457,5 @@ BOOL WINAPI DllMain(HINSTANCE inst_, DWORD reason, void *reserved) {
 	else if (reason == DLL_PROCESS_DETACH) uninstall_hooks();
 	else return false;
 
-
 	return true;
 }
