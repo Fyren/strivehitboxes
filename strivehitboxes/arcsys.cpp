@@ -15,7 +15,7 @@ const auto asw_entity_is_active = (asw_entity_is_active_t)(
 
 using asw_entity_is_pushbox_active_t = bool(*)(const asw_entity*);
 const auto asw_entity_is_pushbox_active = (asw_entity_is_pushbox_active_t)(
-	sigscan::get().scan("\xF7\x80\xCC\x5D", "xxxx") - 0x1A);
+	sigscan::get().scan("\xF7\x80\xCC\x5D\x00\x00\x00\x00\x02\x00", "xx????xxxx") - 0x1A);
 
 using asw_entity_get_pos_x_t = int(*)(const asw_entity*);
 const auto asw_entity_get_pos_x = (asw_entity_get_pos_x_t)(
@@ -27,15 +27,15 @@ const auto asw_entity_get_pos_y = (asw_entity_get_pos_y_t)(
 
 using asw_entity_pushbox_width_t = int(*)(const asw_entity*);
 const auto asw_entity_pushbox_width = (asw_entity_pushbox_width_t)(
-	sigscan::get().scan("\x8B\x81\xE0\x04\x00\x00\x48\x8B\xD9\x85\xC0", "xxxxxxxxxxx") - 6);
+	sigscan::get().scan("\xF6\x81\x80\x03\x00\x00\x01\x75\x40\xE8\xB9\xFC\xFF\xFF", "xxxxxxxxxxxxxx") - 0x19);
 
 using asw_entity_pushbox_height_t = int(*)(const asw_entity*);
 const auto asw_entity_pushbox_height = (asw_entity_pushbox_height_t)(
-	sigscan::get().scan("\x8B\x81\xE4\x04\x00\x00\x48\x8B\xD9\x85\xC0", "xxxxxxxxxxx") - 6);
+	sigscan::get().scan("\xF6\x81\x80\x03\x00\x00\x01\x75\x40\xE8\x99\xFD\xFF\xFF", "xxxxxxxxxxxxxx") - 0x19);
 
 using asw_entity_pushbox_bottom_t = int(*)(const asw_entity*);
 const auto asw_entity_pushbox_bottom = (asw_entity_pushbox_bottom_t)(
-	sigscan::get().scan("\x8B\x81\xE8\x04\x00\x00\x48\x8B\xD9\x3D\xFF", "xxxxxxxxxxx") - 6);
+	sigscan::get().scan("\xF6\x81\x80\x03\x00\x00\x01\x75\x09\xE8\x06\xFD\xFF\xFF", "xxxxxxxxxxxxxx") - 0x1C);
 
 using asw_entity_get_pushbox_t = void(*)(const asw_entity*, int*, int*, int*, int*);
 const auto asw_entity_get_pushbox = (asw_entity_get_pushbox_t)(

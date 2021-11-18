@@ -8,8 +8,8 @@ class AREDGameState_Battle : public AGameState {
 public:
 	static UClass *StaticClass();
 
-	FIELD(0xB70, class asw_engine*, Engine);
-	FIELD(0xB78, class asw_scene*, Scene);
+	FIELD(0xB80, class asw_engine*, Engine);
+	FIELD(0xB88, class asw_scene*, Scene);
 };
 
 class player_block {
@@ -109,10 +109,10 @@ public:
 	FIELD(0x4BC, int, vel_y);
 	FIELD(0x4C0, int, gravity);
 	FIELD(0x4EC, int, pushbox_front_offset);
-	FIELD(0x714, int, throw_box_top);
-	FIELD(0x71C, int, throw_box_bottom);
-	FIELD(0x720, int, throw_range);
-	FIELD(0x1104, int, backdash_invuln);
+	FIELD(0x718, int, throw_box_top);
+	FIELD(0x720, int, throw_box_bottom);
+	FIELD(0x728, int, throw_range);
+	FIELD(0x112C, int, backdash_invuln);
 	// bbscript
 	FIELD(0x1168, bbscript::event_bitmask, event_handler_bitmask);
 	FIELD(0x11C0, bbscript::code_pointer, script_base);
@@ -122,7 +122,8 @@ public:
 	FIELD(0x1120, int, sprite_duration);
 	FIELD(0x1204, int, sprite_changes);
 	ARRAY_FIELD(0x12F0, event_handler[(size_t)bbscript::event_type::MAX], event_handlers);
-	ARRAY_FIELD(0x3628, char[32], state_name);
+	ARRAY_FIELD(0x36E0, char[32], state_name);
+	ARRAY_FIELD(0x3700, char[32], state_name2);
 
 	bool is_active() const;
 	bool is_pushbox_active() const;
