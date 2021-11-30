@@ -402,7 +402,9 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 			break;
 		case VK_F2:
 			std::ofstream f("hitboxesaddrs.log");
-			auto gs = (*GWorld)->GameState;
+			auto world = *GWorld;
+			f << "World: " << world << "\n";
+			auto gs = world->GameState;
 			f << "GameState: " << gs << "\n";
 			auto engine = asw_engine::get();
 			f << "Engine: " << engine << "\n";
@@ -410,7 +412,7 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 			f << "Scene: " << scene << "\n";
 			auto ents = engine->entity_count;
 			f << "Entity count: " << ents << "\n";
-			f << "&ent[0]: " << &engine->entities[0] << "\n";
+			f << "&ents: " << &engine->entities[0] << "\n";
 			break;
 		}
 	}

@@ -6,6 +6,12 @@
 const auto *exe = "GGST-Win64-Shipping.exe";
 const auto *dll = "strivehitboxes.dll";
 
+struct HandleCloser {
+	using pointer = HANDLE;
+	void operator()(HANDLE h) { ::CloseHandle(h); }
+};
+using AutoHandle = std::unique_ptr<HANDLE, HandleCloser>;
+
 bool elevate_privileges()
 {
 	LUID luid;
@@ -19,13 +25,14 @@ bool elevate_privileges()
 	tp.Privileges[0].Luid = luid;
 	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
-	HANDLE token;
-	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &token)) {
+	HANDLE h;
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &h)) {
 		std::cerr << "OpenProcessToken failed" << std::endl;
 		return false;
 	}
+	AutoHandle token(h);
 
-	if (!AdjustTokenPrivileges(token, FALSE, &tp, 0, (TOKEN_PRIVILEGES *)(nullptr), (DWORD *)(nullptr))) {
+	if (!AdjustTokenPrivileges(token.get(), FALSE, &tp, 0, (TOKEN_PRIVILEGES *)(nullptr), (DWORD *)(nullptr))) {
 		std::cerr << "AdjustTokenPrivileges failed" << std::endl;
 		return false;
 	}
@@ -38,12 +45,12 @@ bool inject()
 	if (!elevate_privileges())
 		return false;
 
-	const auto snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	AutoHandle snap(CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0));
 
 	PROCESSENTRY32 entry;
 	entry.dwSize = sizeof(entry);
 
-	Process32First(snap, &entry);
+	Process32First(snap.get(), &entry);
 	do {
 		constexpr auto mask =
 			PROCESS_QUERY_INFORMATION |
@@ -52,18 +59,31 @@ bool inject()
 			PROCESS_VM_READ |
 			PROCESS_VM_WRITE;
 
-		const auto proc = OpenProcess(mask, false, entry.th32ProcessID);
+		AutoHandle proc(OpenProcess(mask, false, entry.th32ProcessID));
 
 		char path[MAX_PATH];
-		if (GetModuleFileNameEx(proc, nullptr, path, MAX_PATH) == 0) {
-			CloseHandle(proc);
-			continue;
+		if (GetModuleFileNameEx(proc.get(), nullptr, path, MAX_PATH) == 0) continue;
+		if (strcmp(path + strlen(path) - strlen(exe), exe) != 0) continue;
+
+		AutoHandle modules(CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetProcessId(proc.get())));
+		if (modules.get() == INVALID_HANDLE_VALUE) {
+			std::cerr << "Couldn't get modules for Strive process" << std::endl;
+			return false;
 		}
 
-		if (strcmp(path + strlen(path) - strlen(exe), exe) != 0) {
-			CloseHandle(proc);
-			continue;
+		MODULEENTRY32 me;
+		me.dwSize = sizeof(MODULEENTRY32);
+		if (!Module32First(modules.get(), &me)) {
+			std::cerr << "Couldn't get modules for Strive process" << std::endl;
+			return false;
 		}
+
+		do {
+			if (strcmp(dll, me.szModule) == 0) {
+				std::cerr << "Already injected" << std::endl;
+				return false;
+			}
+		} while (Module32Next(modules.get(), &me));
 
 		char dll_path[MAX_PATH];
 		GetCurrentDirectory(MAX_PATH, dll_path);
@@ -71,23 +91,19 @@ bool inject()
 		strcat_s(dll_path, MAX_PATH, dll);
 
 		const auto size = strlen(dll_path) + 1;
-		auto *buf = VirtualAllocEx(proc, nullptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+		auto *buf = VirtualAllocEx(proc.get(), nullptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 		if (buf == nullptr) {
 			std::cerr << "VirtualAllocEx failed" << std::endl;
 			return false;
 		}
 
-		WriteProcessMemory(proc, buf, dll_path, size, nullptr);
-		HANDLE th = CreateRemoteThread(proc, nullptr, 0, (LPTHREAD_START_ROUTINE)(LoadLibrary), buf, 0, nullptr);
-		WaitForSingleObject(th, INFINITE);
-
-		CloseHandle(th);
-		CloseHandle(proc);
-		CloseHandle(snap);
+		WriteProcessMemory(proc.get(), buf, dll_path, size, nullptr);
+		AutoHandle th(CreateRemoteThread(proc.get(), nullptr, 0, (LPTHREAD_START_ROUTINE)(LoadLibrary), buf, 0, nullptr));
+		WaitForSingleObject(th.get(), INFINITE);
 
 		std::cout << "Injected" << std::endl;
 		return true;
-	} while (Process32Next(snap, &entry));
+	} while (Process32Next(snap.get(), &entry));
 
 	std::cerr << "Didn't find " << exe << std::endl;
 	return false;
