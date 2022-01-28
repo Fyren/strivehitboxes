@@ -4,12 +4,13 @@
 #include "struct_util.h"
 #include "bbscript.h"
 
+//probably actually AREDGameState_BattleAdv now
 class AREDGameState_Battle : public AGameState {
 public:
 	static UClass *StaticClass();
 
-	FIELD(0xB80, class asw_engine*, Engine);
-	FIELD(0xB88, class asw_scene*, Scene);
+	FIELD(0xB98, class asw_engine*, Engine);
+	FIELD(0xBA0, class asw_scene*, Scene);
 };
 
 class player_block {

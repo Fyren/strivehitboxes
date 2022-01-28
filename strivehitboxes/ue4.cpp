@@ -62,7 +62,7 @@ const auto UCanvas_K2_DrawTriangle = (UCanvas_K2_DrawTriangle_t)(
 	sigscan::get().scan("\x48\x81\xEC\x90\x00\x00\x00\x41\x83\x78\x08\x00", "xxxxxxxxxxxx") - 6);
 
 UWorld **GWorld = (UWorld**)get_rip_relative(
-	sigscan::get().scan("\x0F\x85\xFC\x00\x00\x00\x48\x8B\x05", "xxxxxxxxx") + 9);
+	sigscan::get().scan("\x30\x01\x00\x00\x48\x85\xFF\x74\x31", "xxxxxxxxx") - 26);
 
 FTexture **GWhiteTexture = (FTexture**)get_rip_relative((uintptr_t)UCanvas_K2_DrawTriangle + 0x3A);
 

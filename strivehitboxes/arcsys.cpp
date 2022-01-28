@@ -3,7 +3,7 @@
 
 using StaticClass_t = UClass*(*)();
 const auto AREDGameState_Battle_StaticClass = (StaticClass_t)(get_rip_relative(
-	sigscan::get().scan("\x30\x01\x00\x00\x48\x85\xFF\x74\x36", "xxxxxxxxx") + 10));
+	sigscan::get().scan("\x30\x01\x00\x00\x48\x85\xFF\x74\x31", "xxxxxxxxx") + 10));
 
 using asw_scene_camera_transform_t = void(*)(const asw_scene*, FVector*, FVector*, FVector*);
 const auto asw_scene_camera_transform = (asw_scene_camera_transform_t)(
