@@ -16,7 +16,7 @@ bool elevate_privileges()
 {
 	LUID luid;
 	if (!LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid)) {
-		std::cerr << "LookupPrivilegeValue failed" << std::endl;
+		std::cerr << "LookupPrivilegeValue failed\n";
 		return false;
 	}
 
@@ -27,13 +27,13 @@ bool elevate_privileges()
 
 	HANDLE h;
 	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &h)) {
-		std::cerr << "OpenProcessToken failed" << std::endl;
+		std::cerr << "OpenProcessToken failed\n";
 		return false;
 	}
 	AutoHandle token(h);
 
 	if (!AdjustTokenPrivileges(token.get(), FALSE, &tp, 0, (TOKEN_PRIVILEGES *)(nullptr), (DWORD *)(nullptr))) {
-		std::cerr << "AdjustTokenPrivileges failed" << std::endl;
+		std::cerr << "AdjustTokenPrivileges failed\n";
 		return false;
 	}
 
@@ -67,20 +67,20 @@ bool inject()
 
 		AutoHandle modules(CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetProcessId(proc.get())));
 		if (modules.get() == INVALID_HANDLE_VALUE) {
-			std::cerr << "Couldn't get modules for Strive process" << std::endl;
+			std::cerr << "Couldn't get modules for Strive process\n";
 			return false;
 		}
 
 		MODULEENTRY32 me;
 		me.dwSize = sizeof(MODULEENTRY32);
 		if (!Module32First(modules.get(), &me)) {
-			std::cerr << "Couldn't get modules for Strive process" << std::endl;
+			std::cerr << "Couldn't get modules for Strive process\n";
 			return false;
 		}
 
 		do {
 			if (strcmp(dll, me.szModule) == 0) {
-				std::cerr << "Already injected" << std::endl;
+				std::cerr << "Already injected\n";
 				return false;
 			}
 		} while (Module32Next(modules.get(), &me));
@@ -93,7 +93,7 @@ bool inject()
 		const auto size = strlen(dll_path) + 1;
 		auto *buf = VirtualAllocEx(proc.get(), nullptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 		if (buf == nullptr) {
-			std::cerr << "VirtualAllocEx failed" << std::endl;
+			std::cerr << "VirtualAllocEx failed\n";
 			return false;
 		}
 
@@ -105,7 +105,7 @@ bool inject()
 		return true;
 	} while (Process32Next(snap.get(), &entry));
 
-	std::cerr << "Didn't find " << exe << std::endl;
+	std::cerr << "Didn't find process for " << exe << "\n";
 	return false;
 }
 

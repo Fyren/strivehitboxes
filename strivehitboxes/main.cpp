@@ -5,6 +5,10 @@
 #include "math_util.h"
 #include <cmath>
 #include <array>
+#include <atomic>
+#include <thread>
+#include <chrono>
+using namespace std::chrono_literals;
 #include <vector>
 #include <Windows.h>
 #include <fstream>
@@ -17,6 +21,9 @@ bool hookedKB = false;
 DWORD tID;
 HANDLE th = INVALID_HANDLE_VALUE;
 DWORD WINAPI pump(LPVOID lp);
+
+std::atomic<bool> freeze{false};
+std::atomic<bool> step{false};
 
 constexpr auto AHUD_PostRender_index = 214;
 
@@ -380,6 +387,15 @@ void hook_AHUD_PostRender(AHUD *hud)
 	}
 
 	PostThreadMessage(tID, WM_USER, 0, 0);
+
+	while (freeze.load(std::memory_order_relaxed)) {
+		if (step.load(std::memory_order_relaxed)) {
+			step.store(false, std::memory_order_relaxed);
+			break;
+		}
+
+		std::this_thread::sleep_for(16ms);
+	}
 }
 
 const void *vtable_hook(const void **vtable, const int index, const void *hook)
@@ -397,23 +413,34 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 		KBDLLHOOKSTRUCT k = *(KBDLLHOOKSTRUCT*)lParam;
 
 		switch (k.vkCode) {
-		case VK_F1:
-			FreeLibraryAndExitThread(inst, 0);
-			break;
-		case VK_F2:
-			std::ofstream f("hitboxesaddrs.log");
-			auto world = *GWorld;
-			f << "World: " << world << "\n";
-			auto gs = world->GameState;
-			f << "GameState: " << gs << "\n";
-			auto engine = asw_engine::get();
-			f << "Engine: " << engine << "\n";
-			auto scene = asw_scene::get();
-			f << "Scene: " << scene << "\n";
-			auto ents = engine->entity_count;
-			f << "Entity count: " << ents << "\n";
-			f << "&ents: " << &engine->entities[0] << "\n";
-			break;
+			case VK_F1: {
+				FreeLibraryAndExitThread(inst, 0);
+				break;
+			}
+			case VK_F2: {
+				std::ofstream f("hitboxesaddrs.log");
+				auto world = *GWorld;
+				f << "World: " << world << "\n";
+				auto gs = world->GameState;
+				f << "GameState: " << gs << "\n";
+				auto engine = asw_engine::get();
+				f << "Engine: " << engine << "\n";
+				auto scene = asw_scene::get();
+				f << "Scene: " << scene << "\n";
+				auto ents = engine->entity_count;
+				f << "Entity count: " << ents << "\n";
+				f << "&ents: " << &engine->entities[0] << "\n";
+				break;
+			}
+			case VK_F3: {
+				bool fr = freeze.load(std::memory_order_relaxed);
+				freeze.store(!fr, std::memory_order_relaxed);
+				break;
+			}
+			case VK_F4: {
+				step.store(true, std::memory_order_relaxed);
+				break;
+			}
 		}
 	}
 	return CallNextHookEx(kbh, nCode, wParam, lParam);
