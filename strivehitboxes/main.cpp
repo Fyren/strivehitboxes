@@ -24,6 +24,7 @@ DWORD WINAPI pump(LPVOID lp);
 
 std::atomic<bool> freeze{false};
 std::atomic<bool> step{false};
+std::atomic<bool> die{false};
 
 constexpr auto AHUD_PostRender_index = 214;
 
@@ -388,7 +389,7 @@ void hook_AHUD_PostRender(AHUD *hud)
 
 	PostThreadMessage(tID, WM_USER, 0, 0);
 
-	while (freeze.load(std::memory_order_relaxed)) {
+	while (freeze.load(std::memory_order_relaxed) && !die.load(std::memory_order_relaxed)) {
 		if (step.load(std::memory_order_relaxed)) {
 			step.store(false, std::memory_order_relaxed);
 			break;
@@ -414,6 +415,9 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 
 		switch (k.vkCode) {
 			case VK_F1: {
+				//more low-effort frame step handling; try not to hang the game on unload
+				die.store(true);
+				std::this_thread::sleep_for(100ms);
 				FreeLibraryAndExitThread(inst, 0);
 				break;
 			}
