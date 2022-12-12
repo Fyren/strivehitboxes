@@ -275,8 +275,16 @@ hitbox calc_throw_box(const asw_entity *entity)
 		return box;
 	}
 
-	box.y = (float)entity->throw_box_bottom;
-	box.h = (float)(entity->throw_box_top - entity->throw_box_bottom);
+	//In the air, the pushbox is offset upwards from the origin.
+	int left, top, right, bottom;
+	entity->get_pushbox(&left, &top, &right, &bottom);
+	/*
+	box.y = (float)(entity->throw_box_bottom + top - entity->pos_y);
+	box.h = (float)(entity->throw_box_top - entity->throw_box_bottom );
+	*/
+	box.y = (float)(entity->throw_box_bottom + top - bottom - entity->ply_PushColHeightLowAir);
+	box.h = (float)(entity->throw_box_top - entity->throw_box_bottom - top + bottom);
+	//box.h = 90000;
 	return box;
 }
 
@@ -346,6 +354,50 @@ void draw_pushbox(UCanvas *canvas, const asw_entity *entity)
 	draw_rect(canvas, corners, color);
 }
 
+void draw_debuglines(UCanvas* canvas, const asw_entity* entity) {
+	int left, top, right, bottom;
+	entity->get_pushbox(&left, &top, &right, &bottom);
+
+	std::array pts = {
+		FVector2D(entity->pos_x - 150000, entity->pos_y - 50000),
+		FVector2D(entity->pos_x + 150000, entity->pos_y - 50000),
+		FVector2D(entity->pos_x - 150000, entity->pos_y + 200000),
+		FVector2D(entity->pos_x + 150000, entity->pos_y + 200000),
+		FVector2D(entity->pos_x - 150000, bottom),
+		FVector2D(entity->pos_x + 150000, bottom),
+		FVector2D(entity->pos_x - 150000, top),
+		FVector2D(entity->pos_x + 150000, top),
+	};
+	auto red = FLinearColor(1.f, 0.f, 0.f, 0.f);
+	auto green = FLinearColor(0.f, 1.f, 0.f, 0.f);
+	auto blue = FLinearColor(0.f, 0.f, 1.f, 0.f);
+	auto yellow = FLinearColor(1.f, 1.f, 0.f, 0.f);
+
+	for (auto& pos : pts)
+		asw_coords_to_screen(canvas, &pos);
+
+	canvas->K2_DrawLine(pts[0], pts[1], 2.F, red);
+	canvas->K2_DrawLine(pts[2], pts[3], 2.F, green);
+	//canvas->K2_DrawLine(pts[4], pts[5], 2.F, blue);
+	//canvas->K2_DrawLine(pts[6], pts[7], 2.F, yellow);
+}
+
+void draw_origin(UCanvas* canvas, const asw_entity* entity) {
+	std::array pts  = {
+		FVector2D(entity->pos_x - 5000, entity->pos_y),
+		FVector2D(entity->pos_x + 5000, entity->pos_y),
+		FVector2D(entity->pos_x, entity->pos_y - 5000),
+		FVector2D(entity->pos_x, entity->pos_y + 5000)
+	};
+	auto white = FLinearColor(1.f, 1.f, 1.f, 0.f);
+
+	for (auto& pos : pts)
+		asw_coords_to_screen(canvas, &pos);
+
+	for (auto i = 0; i < 2; i++)
+		canvas->K2_DrawLine(pts[i * 2], pts[i * 2 + 1], 3.F, white);
+}
+
 void draw_display(UCanvas *canvas)
 {
 	const auto *engine = asw_engine::get();
@@ -371,6 +423,9 @@ void draw_display(UCanvas *canvas)
 			draw_hitboxes(canvas, attached, active);
 			attached = attached->attached;
 		}
+
+		draw_origin(canvas, entity);
+		draw_debuglines(canvas, entity);
 	}
 }
 
@@ -409,6 +464,18 @@ const void *vtable_hook(const void **vtable, const int index, const void *hook)
 	return orig;
 }
 
+void throwdebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
+	int left, top, right, bottom;
+	player->get_pushbox(&left, &top, &right, &bottom);
+	int width = player->pushbox_width();
+	int height = player->pushbox_height();
+
+	f << tag << " XY: " << player->pos_x << " " << player->pos_y << "\n";
+	f << tag << " Pushbox" << std::setw(18) << top << "\n";
+	f << tag << "        " << std::setw(9) << left << std::setw(18) << right << "  " << width << " x " << height << "\n";
+	f << tag << "        " << std::setw(18) << bottom << "\n\n";
+}
+
 LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 	if (nCode >= HC_ACTION && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
 		KBDLLHOOKSTRUCT k = *(KBDLLHOOKSTRUCT*)lParam;
@@ -422,18 +489,21 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 				break;
 			}
 			case VK_F2: {
-				std::ofstream f("hitboxesaddrs.log");
-				auto world = *GWorld;
-				f << "World: " << world << "\n";
-				auto gs = world->GameState;
-				f << "GameState: " << gs << "\n";
-				auto engine = asw_engine::get();
-				f << "Engine: " << engine << "\n";
-				auto scene = asw_scene::get();
-				f << "Scene: " << scene << "\n";
-				auto ents = engine->entity_count;
-				f << "Entity count: " << ents << "\n";
-				f << "&ents: " << &engine->entities[0] << "\n";
+				std::ofstream f("hitboxesdump.log");
+				f << "World: " << *GWorld << "\n";
+				f << "GameState: " << (*GWorld)->GameState << "\n";
+				f << "Engine: " << asw_engine::get() << "\n";
+				f << "Scene: " << asw_scene::get() << "\n";
+				f << "Entity count: " << asw_engine::get()->entity_count << "\n";
+				f << "&ents: " << &asw_engine::get()->entities[0] << "\n";
+				auto p1 = asw_engine::get()->players[0].entity;
+				auto p2 = asw_engine::get()->players[1].entity;
+				f << "P1: " << p1 << "\n";
+				f << "P2: " << p2 << "\n\n";
+
+				throwdebug(f, p1, "P1");
+				throwdebug(f, p2, "P2");
+				
 				break;
 			}
 			case VK_F3: {

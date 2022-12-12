@@ -110,9 +110,9 @@ public:
 	FIELD(0x4BC, int, vel_y);
 	FIELD(0x4C0, int, gravity);
 	FIELD(0x4EC, int, pushbox_front_offset);
-	FIELD(0x728, int, throw_box_top);
-	FIELD(0x730, int, throw_box_bottom);
-	FIELD(0x738, int, throw_range);
+	FIELD(0x72C, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x6e8 + CAtkParam::m_AtkRangeMaxY 0x44
+	FIELD(0x734, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x6e8 + CAtkParam::m_AtkRangeMinY 0x4c
+	FIELD(0x738, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x6e8 + CAtkParam::m_AtkPushRangeX 0x50
 	FIELD(0x113C, int, backdash_invuln);
 	// bbscript
 	FIELD(0x1168, bbscript::event_bitmask, event_handler_bitmask);
@@ -125,6 +125,7 @@ public:
 	ARRAY_FIELD(0x12F0, event_handler[(size_t)bbscript::event_type::MAX], event_handlers);
 	ARRAY_FIELD(0x36E0, char[32], state_name);
 	ARRAY_FIELD(0x3700, char[32], state_name2);
+	FIELD(0x98B0, int, ply_PushColHeightLowAir);
 
 	bool is_active() const;
 	bool is_pushbox_active() const;
