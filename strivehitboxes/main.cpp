@@ -424,8 +424,8 @@ void draw_display(UCanvas *canvas)
 			attached = attached->attached;
 		}
 
-		draw_origin(canvas, entity);
-		draw_debuglines(canvas, entity);
+		//draw_origin(canvas, entity);
+		//draw_debuglines(canvas, entity);
 	}
 }
 

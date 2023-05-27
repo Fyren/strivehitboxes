@@ -14,7 +14,7 @@ using FCanvasTriangleItem_ctor_t = void(*)(
 	const FVector2D&,
 	const FTexture*);
 const auto FCanvasTriangleItem_ctor = (FCanvasTriangleItem_ctor_t)(
-	sigscan::get().scan("\x48\x89\x4B\x10\x88\x4B\x18", "xxxxxxx") - 0x34);
+	sigscan::get().scan("\x48\x89\x4B\x10\x88\x4B\x18\x48\x89\x4B\x20\x0F\x10", "xxxxxxxxxxxxx") - 0x34);
 
 using FCanvas_Flush_GameThread_t = void(*)(FCanvas *, bool);
 const auto FCanvas_Flush_GameThread = (FCanvas_Flush_GameThread_t)(
