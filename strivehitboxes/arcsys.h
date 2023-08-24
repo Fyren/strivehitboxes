@@ -126,6 +126,9 @@ public:
 	ARRAY_FIELD(0x36E0, char[32], state_name);
 	ARRAY_FIELD(0x3700, char[32], state_name2);*/
 	FIELD(0x9928, int, ply_PushColHeightLowAir);
+	FIELD(0xF210, int, afro); //OBJ_CCharObj::m_IsAfro
+	FIELD(0xF248, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x218 + ExtendJonParam::m_ColW 0x30
+	FIELD(0xF24C, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x218 + ExtendJonParam::m_ColH 0x34
 
 	bool is_active() const;
 	bool is_pushbox_active() const;

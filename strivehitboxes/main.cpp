@@ -258,6 +258,20 @@ void draw_hitbox(UCanvas *canvas, const asw_entity *entity, const drawn_hitbox &
 	}
 }
 
+hitbox calc_afro_box(const asw_entity* entity, int exIndex) {
+	hitbox afro;
+	afro.type = hitbox::box_type::hurt;
+
+	const auto& extend = entity->hitboxes[exIndex];
+
+	afro.h = entity->afroH;
+	afro.w = entity->afroW;
+	afro.x = extend.x - entity->afroW / 2.0;
+	afro.y = extend.y - entity->afroH / 2.0;
+
+	return afro;
+}
+
 hitbox calc_throw_box(const asw_entity *entity)
 {
 	// Create a fake hitbox for throws to be displayed
@@ -306,6 +320,10 @@ void draw_hitboxes(UCanvas *canvas, const asw_entity *entity, bool active)
 
 		hitboxes.push_back(drawn_hitbox(box));
 	}
+
+	//hacky afro hurtbox
+	if (entity->is_player && entity->afro && !entity->is_strike_invuln()) 
+		hitboxes.push_back(calc_afro_box(entity, count));
 
 	// Add throw hitbox if in use
 	if (entity->throw_range >= 0 && active)
@@ -476,6 +494,22 @@ void throwdebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
 	f << tag << "        " << std::setw(18) << bottom << "\n\n";
 }
 
+void afrodebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
+	int i = player->hitbox_count + player->hurtbox_count;
+	const auto& extend = player->hitboxes[i];
+	f << tag << " Player, afro, index: " << player->is_player << " " << player->afro << " " << i << "\n";
+	f << tag << " afroHW: " << player->afroH << " " << player->afroW << "\n";
+	f << tag << " ExXY: " << player->afroW << " " << extend.y << "\n";
+
+	hitbox afro;
+	afro.type = hitbox::box_type::hurt;
+	afro.h = player->afroH;
+	afro.w = player->afroW;
+	afro.x = extend.x - player->afroW / 2.0;
+	afro.y = extend.y - player->afroH / 2.0;
+	f << tag << " Calc'd XYWH: " << afro.x << " " << afro.y << " " << afro.w << " " << afro.h << "\n\n";
+}
+
 LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 	if (nCode >= HC_ACTION && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
 		KBDLLHOOKSTRUCT k = *(KBDLLHOOKSTRUCT*)lParam;
@@ -501,8 +535,11 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 				f << "P1: " << p1 << "\n";
 				f << "P2: " << p2 << "\n\n";
 
-				throwdebug(f, p1, "P1");
-				throwdebug(f, p2, "P2");
+				//throwdebug(f, p1, "P1");
+				//throwdebug(f, p2, "P2");
+
+				//afrodebug(f, p1, "P1 afro");
+				//afrodebug(f, p2, "P2 afro");
 				
 				break;
 			}
