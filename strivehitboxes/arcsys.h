@@ -9,8 +9,8 @@ class AREDGameState_Battle : public AGameState {
 public:
 	static UClass *StaticClass();
 
-	FIELD(0xBA0, class asw_engine*, Engine);
-	FIELD(0xBA8, class asw_scene*, Scene);
+	FIELD(0xBA8, class asw_engine*, Engine);
+	//FIELD(0xBA8, class asw_scene*, Scene);
 };
 
 class player_block {
