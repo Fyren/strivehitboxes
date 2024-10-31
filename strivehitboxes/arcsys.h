@@ -9,8 +9,8 @@ class AREDGameState_Battle : public AGameState {
 public:
 	static UClass *StaticClass();
 
-	FIELD(0xBB0, class asw_engine*, Engine);
-	FIELD(0xBB8, class asw_scene*, Scene);
+	FIELD(0xBB8, class asw_engine*, Engine);
+	FIELD(0xBC0, class asw_scene*, Scene);
 };
 
 class player_block {
@@ -90,7 +90,7 @@ public:
 	//FIELD(0x1B0, int, state_frames);
 	FIELD(0x2C0, asw_entity*, opponent);
 	//FIELD(0x2C8, asw_entity*, parent);
-	FIELD(0x318, asw_entity*, attached); //this is probably wrong
+	FIELD(0x318, asw_entity*, attached);
 	//BIT_FIELD(0x380, 1, airborne);
 	BIT_FIELD(0x390, 256, counterhit);
 	BIT_FIELD(0x394, 16, strike_invuln);
@@ -110,10 +110,10 @@ public:
 	FIELD(0x4BC, int, vel_y);
 	FIELD(0x4C0, int, gravity);*/
 	FIELD(0x4FC, int, pushbox_front_offset);
-	FIELD(0x73C, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x6e8 + CAtkParam::m_AtkRangeMaxY 0x44
-	FIELD(0x744, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x6e8 + CAtkParam::m_AtkRangeMinY 0x4c
-	FIELD(0x748, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x6e8 + CAtkParam::m_AtkPushRangeX 0x50
-	FIELD(0x1168, int, backdash_invuln);
+	FIELD(0x794, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMaxY 0x44
+	FIELD(0x79C, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMinY 0x4c
+	FIELD(0x7A0, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x750 + CAtkParam::m_AtkPushRangeX 0x50
+	FIELD(0x11CC, int, backdash_invuln);
 	// bbscript
 	/*FIELD(0x1168, bbscript::event_bitmask, event_handler_bitmask);
 	FIELD(0x11C0, bbscript::code_pointer, script_base);
@@ -125,10 +125,10 @@ public:
 	ARRAY_FIELD(0x12F0, event_handler[(size_t)bbscript::event_type::MAX], event_handlers);
 	ARRAY_FIELD(0x36E0, char[32], state_name);
 	ARRAY_FIELD(0x3700, char[32], state_name2);*/
-	FIELD(0x993C, int, ply_PushColHeightLowAir);
-	FIELD(0xF230, int, afro); //OBJ_CCharObj::m_IsAfro
-	FIELD(0xF268, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0xF238 + ExtendJonParam::m_ColW 0x30
-	FIELD(0xF26C, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0xF238 + ExtendJonParam::m_ColH 0x34
+	FIELD(0x9ADC, int, ply_PushColHeightLowAir);
+	FIELD(0xF638, int, afro); //OBJ_CCharObj::m_IsAfro
+	FIELD(0xF670, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0xF640 + ExtendJonParam::m_ColW 0x30
+	FIELD(0xF674, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0xF640 + ExtendJonParam::m_ColH 0x34
 
 	bool is_active() const;
 	bool is_pushbox_active() const;

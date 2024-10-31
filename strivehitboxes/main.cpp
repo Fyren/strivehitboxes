@@ -510,6 +510,26 @@ void afrodebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
 	f << tag << " Calc'd XYWH: " << afro.x << " " << afro.y << " " << afro.w << " " << afro.h << "\n\n";
 }
 
+void dump() {
+	std::ofstream f("hitboxesdump.log");
+	f << "World: " << *GWorld << "\n";
+	f << "GameState: " << (*GWorld)->GameState << "\n";
+	f << "Engine: " << asw_engine::get() << "\n";
+	f << "Scene: " << asw_scene::get() << "\n";
+	f << "Entity count: " << asw_engine::get()->entity_count << "\n";
+	f << "&ents: " << &asw_engine::get()->entities[0] << "\n";
+	auto p1 = asw_engine::get()->players[0].entity;
+	auto p2 = asw_engine::get()->players[1].entity;
+	f << "P1: " << p1 << "\n";
+	f << "P2: " << p2 << "\n\n";
+
+	//throwdebug(f, p1, "P1");
+	//throwdebug(f, p2, "P2");
+
+	//afrodebug(f, p1, "P1 afro");
+	//afrodebug(f, p2, "P2 afro");
+}
+
 LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 	if (nCode >= HC_ACTION && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
 		KBDLLHOOKSTRUCT k = *(KBDLLHOOKSTRUCT*)lParam;
@@ -523,24 +543,7 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 				break;
 			}
 			case VK_F2: {
-				std::ofstream f("hitboxesdump.log");
-				f << "World: " << *GWorld << "\n";
-				f << "GameState: " << (*GWorld)->GameState << "\n";
-				f << "Engine: " << asw_engine::get() << "\n";
-				f << "Scene: " << asw_scene::get() << "\n";
-				f << "Entity count: " << asw_engine::get()->entity_count << "\n";
-				f << "&ents: " << &asw_engine::get()->entities[0] << "\n";
-				auto p1 = asw_engine::get()->players[0].entity;
-				auto p2 = asw_engine::get()->players[1].entity;
-				f << "P1: " << p1 << "\n";
-				f << "P2: " << p2 << "\n\n";
-
-				//throwdebug(f, p1, "P1");
-				//throwdebug(f, p2, "P2");
-
-				//afrodebug(f, p1, "P1 afro");
-				//afrodebug(f, p2, "P2 afro");
-				
+				dump();
 				break;
 			}
 			case VK_F3: {
@@ -559,14 +562,12 @@ LRESULT CALLBACK KPLL(int nCode, WPARAM wParam, LPARAM lParam) {
 
 void install_hooks()
 {
-	// AHUD::PostRender
-	orig_AHUD_PostRender = (AHUD_PostRender_t)
-		vtable_hook(AHUD_vtable, AHUD_PostRender_index, hook_AHUD_PostRender);
+	//dump();
+	orig_AHUD_PostRender = (AHUD_PostRender_t) vtable_hook(AHUD_vtable, AHUD_PostRender_index, hook_AHUD_PostRender);
 }
 
 void uninstall_hooks()
 {
-	// AHUD::PostRender
 	vtable_hook(AHUD_vtable, AHUD_PostRender_index, orig_AHUD_PostRender);
 	if (kbh) UnhookWindowsHookEx(kbh);
 }
