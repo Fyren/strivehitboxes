@@ -212,7 +212,7 @@ void transform_hitbox_point(const UCanvas *canvas, const OBJ_CBase *entity, FVec
 		pos->X *= -entity->scale_x;
 		pos->Y *= -entity->scale_y;
 
-		*pos = pos->Rotate((float)entity->angle_x * (float)M_PI / 180000.f);
+		*pos = pos->Rotate(static_cast<float>(entity->angle_x * M_PI / 180000.0));
 
 		if (entity->facing == direction::left)
 			pos->X *= -1.f;
@@ -280,12 +280,12 @@ hitbox calc_throw_box(const OBJ_CBase *entity)
 
 	const auto pushbox_front = entity->pushbox_width() / 2 + entity->pushbox_front_offset;
 	box.x = 0.f;
-	box.w = (float)(pushbox_front + entity->throw_range);
+	box.w = static_cast<float>(pushbox_front + entity->throw_range);
 
 	if (entity->throw_box_top <= entity->throw_box_bottom) {
 		// No throw height, use pushbox height for display
 		box.y = 0.f;
-		box.h = (float)entity->pushbox_height();
+		box.h = static_cast<float>(entity->pushbox_height());
 		return box;
 	}
 
@@ -296,8 +296,8 @@ hitbox calc_throw_box(const OBJ_CBase *entity)
 	box.y = (float)(entity->throw_box_bottom + top - entity->pos_y);
 	box.h = (float)(entity->throw_box_top - entity->throw_box_bottom );
 	*/
-	box.y = (float)(entity->throw_box_bottom + top - bottom - entity->ply_PushColHeightLowAir);
-	box.h = (float)(entity->throw_box_top - entity->throw_box_bottom - top + bottom);
+	box.y = static_cast<float>(entity->throw_box_bottom + top - bottom - entity->ply_PushColHeightLowAir);
+	box.h = static_cast<float>(entity->throw_box_top - entity->throw_box_bottom - top + bottom);
 	//box.h = 90000;
 	return box;
 }
@@ -514,7 +514,6 @@ void dump() {
 	std::ofstream f("hitboxesdump.log");
 	f << "World: " << *GWorld << std::endl;
 	f << "GameState: " << (*GWorld)->GameState << std::endl;
-	return;
 	f << "Engine: " << BATTLE_CObjectManager::get() << std::endl;
 	f << "Scene: " << BATTLE_CScreenManager::get() << std::endl;
 	f << "Entity count: " << BATTLE_CObjectManager::get()->entity_count << std::endl;

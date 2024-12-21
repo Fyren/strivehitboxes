@@ -8,11 +8,12 @@ class AREDGameState_Battle : public AGameState {
 public:
 	static UClass *StaticClass();
 
-	FIELD(0xBB8, class BATTLE_CObjectManager*, Engine);
-	FIELD(0xBC0, class BATTLE_CScreenManager*, Scene);
+	FIELD(0xC30, class BATTLE_CObjectManager*, Engine);
+	FIELD(0xC38, class BATTLE_CScreenManager*, Scene);
 };
 
 class BATTLE_TeamManager {
+	char pad[0x190];
 public:
 	FIELD(0x8, class OBJ_CBase*, mainPlayer); //OBJ_CCharBase* m_pMainPlayerObject
 };
@@ -26,8 +27,8 @@ public:
 	static BATTLE_CObjectManager *get();
 
 	ARRAY_FIELD(0x0, BATTLE_TeamManager[2], m_TeamManagers);
-	FIELD(0x8A0, int, entity_count); //int m_ActiveObjectCount
-	ARRAY_FIELD(0xC10, class OBJ_CBase*[107], entities); //OBJ_CBase* m_SortedObjPtrVector[107]
+	FIELD(0x900, int, entity_count); //int m_ActiveObjectCount
+	ARRAY_FIELD(0xC70, class OBJ_CBase*[107], entities); //OBJ_CBase* m_SortedObjPtrVector[107]
 };
 
 
@@ -100,11 +101,11 @@ public:
 	FIELD(0x794, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMaxY 0x44
 	FIELD(0x79C, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMinY 0x4c
 	FIELD(0x7A0, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x750 + CAtkParam::m_AtkPushRangeX 0x50
-	FIELD(0x11CC, int, backdash_invuln);
-	FIELD(0x9ADC, int, ply_PushColHeightLowAir);
-	FIELD(0xF638, int, afro); //OBJ_CCharObj::m_IsAfro
-	FIELD(0xF670, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0xF640 + ExtendJonParam::m_ColW 0x30
-	FIELD(0xF674, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0xF640 + ExtendJonParam::m_ColH 0x34
+	FIELD(0x11EC, int, backdash_invuln);
+	FIELD(0x9B6C, int, ply_PushColHeightLowAir);
+	FIELD(0x102A8, int, afro); //OBJ_CCharObj::m_IsAfro
+	FIELD(0x102E0, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColW 0x30
+	FIELD(0x102E4, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColH 0x34
 
 	bool is_active() const;
 	bool is_pushbox_active() const;
