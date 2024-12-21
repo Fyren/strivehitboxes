@@ -79,7 +79,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="bbscript.cpp" />
     <ClCompile Include="math_util.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sigscan.cpp" />
@@ -87,12 +86,10 @@
     <ClCompile Include="ue4.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bbscript.h" />
     <ClInclude Include="bitmask.h" />
     <ClInclude Include="math_util.h" />
     <ClInclude Include="sigscan.h" />
     <ClInclude Include="arcsys.h" />
-    <ClInclude Include="simulation.h" />
     <ClInclude Include="struct_util.h" />
     <ClInclude Include="ue4.h" />
   </ItemGroup>

@@ -2,41 +2,38 @@
 
 #include "ue4.h"
 #include "struct_util.h"
-#include "bbscript.h"
 
 //probably actually AREDGameState_BattleAdv now
 class AREDGameState_Battle : public AGameState {
 public:
 	static UClass *StaticClass();
 
-	FIELD(0xBB8, class asw_engine*, Engine);
-	FIELD(0xBC0, class asw_scene*, Scene);
+	FIELD(0xBB8, class BATTLE_CObjectManager*, Engine);
+	FIELD(0xBC0, class BATTLE_CScreenManager*, Scene);
 };
 
-class player_block {
-	char pad[0x160];
+class BATTLE_TeamManager {
 public:
-	FIELD(0x8, class asw_entity*, entity);
+	FIELD(0x8, class OBJ_CBase*, mainPlayer); //OBJ_CCharBase* m_pMainPlayerObject
 };
 
-static_assert(sizeof(player_block) == 0x160);
 
 // Used by the shared GG/BB/DBFZ engine code
-class asw_engine {
+class BATTLE_CObjectManager {
 public:
 	static constexpr auto COORD_SCALE = .458f;
 
-	static asw_engine *get();
+	static BATTLE_CObjectManager *get();
 
-	ARRAY_FIELD(0x0, player_block[2], players);
-	FIELD(0x8A0, int, entity_count);
-	ARRAY_FIELD(0xC10, class asw_entity*[110], entities);
+	ARRAY_FIELD(0x0, BATTLE_TeamManager[2], m_TeamManagers);
+	FIELD(0x8A0, int, entity_count); //int m_ActiveObjectCount
+	ARRAY_FIELD(0xC10, class OBJ_CBase*[107], entities); //OBJ_CBase* m_SortedObjPtrVector[107]
 };
 
 
-class asw_scene {
+class BATTLE_CScreenManager {
 public:
-	static asw_scene *get();
+	static BATTLE_CScreenManager *get();
 
 	// "delta" is the difference between input and output position
 	// position gets written in place
@@ -63,17 +60,7 @@ enum class direction : int {
 	left = 1
 };
 
-class event_handler {
-	char pad[0x58];
-
-public:
-	FIELD(0x0, bbscript::code_pointer, script);
-	FIELD(0x28, int, trigger_value);
-};
-
-static_assert(sizeof(event_handler) == 0x58);
-
-class asw_entity {
+class OBJ_CBase {
 public:
 	FIELD(0x18, bool, is_player);
 	//FIELD(0x44, unsigned char, player_index);
@@ -88,9 +75,9 @@ public:
 	//  \_____|  \____/   \____/  |_| \_|    |_|    |______| |_|  \_\ 
 	BIT_FIELD(0x1A8, 0x4000000, cinematic_counter);
 	//FIELD(0x1B0, int, state_frames);
-	FIELD(0x2C0, asw_entity*, opponent);
+	FIELD(0x2C0, OBJ_CBase*, opponent);
 	//FIELD(0x2C8, asw_entity*, parent);
-	FIELD(0x318, asw_entity*, attached);
+	FIELD(0x318, OBJ_CBase*, attached);
 	//BIT_FIELD(0x380, 1, airborne);
 	BIT_FIELD(0x390, 256, counterhit);
 	BIT_FIELD(0x394, 16, strike_invuln);
@@ -106,25 +93,14 @@ public:
 	FIELD(0x3C4, int, scale_x);
 	FIELD(0x3C8, int, scale_y);
 	FIELD(0x3CC, int, scale_z);
-	/*FIELD(0x4B8, int, vel_x);
-	FIELD(0x4BC, int, vel_y);
-	FIELD(0x4C0, int, gravity);*/
+	//FIELD(0x4B8, int, vel_x);
+	//FIELD(0x4BC, int, vel_y);
+	//FIELD(0x4C0, int, gravity);
 	FIELD(0x4FC, int, pushbox_front_offset);
 	FIELD(0x794, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMaxY 0x44
 	FIELD(0x79C, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMinY 0x4c
 	FIELD(0x7A0, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x750 + CAtkParam::m_AtkPushRangeX 0x50
 	FIELD(0x11CC, int, backdash_invuln);
-	// bbscript
-	/*FIELD(0x1168, bbscript::event_bitmask, event_handler_bitmask);
-	FIELD(0x11C0, bbscript::code_pointer, script_base);
-	FIELD(0x11C8, bbscript::code_pointer, next_script_cmd);
-	FIELD(0x11D0, bbscript::code_pointer, first_script_cmd);
-	FIELD(0x11F8, int, sprite_frames);
-	FIELD(0x1120, int, sprite_duration);
-	FIELD(0x1204, int, sprite_changes);
-	ARRAY_FIELD(0x12F0, event_handler[(size_t)bbscript::event_type::MAX], event_handlers);
-	ARRAY_FIELD(0x36E0, char[32], state_name);
-	ARRAY_FIELD(0x3700, char[32], state_name2);*/
 	FIELD(0x9ADC, int, ply_PushColHeightLowAir);
 	FIELD(0xF638, int, afro); //OBJ_CCharObj::m_IsAfro
 	FIELD(0xF670, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0xF640 + ExtendJonParam::m_ColW 0x30

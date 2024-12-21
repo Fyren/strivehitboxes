@@ -154,11 +154,11 @@ struct drawn_hitbox {
 
 void asw_coords_to_screen(const UCanvas *canvas, FVector2D *pos)
 {
-	pos->X *= asw_engine::COORD_SCALE / 1000.F;
-	pos->Y *= asw_engine::COORD_SCALE / 1000.F;
+	pos->X *= BATTLE_CObjectManager::COORD_SCALE / 1000.F;
+	pos->Y *= BATTLE_CObjectManager::COORD_SCALE / 1000.F;
 
 	FVector pos3d(pos->X, 0.f, pos->Y);
-	asw_scene::get()->camera_transform(&pos3d, nullptr);
+	BATTLE_CScreenManager::get()->camera_transform(&pos3d, nullptr);
 
 	const auto proj = canvas->K2_Project(pos3d);
 	*pos = FVector2D(proj.X, proj.Y);
@@ -206,7 +206,7 @@ void draw_rect(
 }
 
 // Transform entity local space to screen space
-void transform_hitbox_point(const UCanvas *canvas, const asw_entity *entity, FVector2D *pos, bool is_throw)
+void transform_hitbox_point(const UCanvas *canvas, const OBJ_CBase *entity, FVector2D *pos, bool is_throw)
 {
 	if (!is_throw) {
 		pos->X *= -entity->scale_x;
@@ -228,7 +228,7 @@ void transform_hitbox_point(const UCanvas *canvas, const asw_entity *entity, FVe
 	asw_coords_to_screen(canvas, pos);
 }
 
-void draw_hitbox(UCanvas *canvas, const asw_entity *entity, const drawn_hitbox &box)
+void draw_hitbox(UCanvas *canvas, const OBJ_CBase *entity, const drawn_hitbox &box)
 {
 	FLinearColor color;
 	if (box.type == hitbox::box_type::hit)
@@ -258,21 +258,21 @@ void draw_hitbox(UCanvas *canvas, const asw_entity *entity, const drawn_hitbox &
 	}
 }
 
-hitbox calc_afro_box(const asw_entity* entity, int exIndex) {
+hitbox calc_afro_box(const OBJ_CBase* entity, int exIndex) {
 	hitbox afro;
 	afro.type = hitbox::box_type::hurt;
 
 	const auto& extend = entity->hitboxes[exIndex];
 
-	afro.h = entity->afroH;
-	afro.w = entity->afroW;
-	afro.x = extend.x - entity->afroW / 2.0;
-	afro.y = extend.y - entity->afroH / 2.0;
+	afro.h = static_cast<float>(entity->afroH);
+	afro.w = static_cast<float>(entity->afroW);
+	afro.x = extend.x - entity->afroW / 2.0f;
+	afro.y = extend.y - entity->afroH / 2.0f;
 
 	return afro;
 }
 
-hitbox calc_throw_box(const asw_entity *entity)
+hitbox calc_throw_box(const OBJ_CBase *entity)
 {
 	// Create a fake hitbox for throws to be displayed
 	hitbox box;
@@ -302,7 +302,7 @@ hitbox calc_throw_box(const asw_entity *entity)
 	return box;
 }
 
-void draw_hitboxes(UCanvas *canvas, const asw_entity *entity, bool active)
+void draw_hitboxes(UCanvas *canvas, const OBJ_CBase *entity, bool active)
 {
 	const auto count = entity->hitbox_count + entity->hurtbox_count;
 
@@ -347,7 +347,7 @@ void draw_hitboxes(UCanvas *canvas, const asw_entity *entity, bool active)
 	}
 }
 
-void draw_pushbox(UCanvas *canvas, const asw_entity *entity)
+void draw_pushbox(UCanvas *canvas, const OBJ_CBase *entity)
 {
 	int left, top, right, bottom;
 	entity->get_pushbox(&left, &top, &right, &bottom);
@@ -372,7 +372,7 @@ void draw_pushbox(UCanvas *canvas, const asw_entity *entity)
 	draw_rect(canvas, corners, color);
 }
 
-void draw_debuglines(UCanvas* canvas, const asw_entity* entity) {
+void draw_debuglines(UCanvas* canvas, const OBJ_CBase* entity) {
 	int left, top, right, bottom;
 	entity->get_pushbox(&left, &top, &right, &bottom);
 
@@ -400,7 +400,7 @@ void draw_debuglines(UCanvas* canvas, const asw_entity* entity) {
 	//canvas->K2_DrawLine(pts[6], pts[7], 2.F, yellow);
 }
 
-void draw_origin(UCanvas* canvas, const asw_entity* entity) {
+void draw_origin(UCanvas* canvas, const OBJ_CBase* entity) {
 	std::array pts  = {
 		FVector2D(entity->pos_x - 5000, entity->pos_y),
 		FVector2D(entity->pos_x + 5000, entity->pos_y),
@@ -418,7 +418,7 @@ void draw_origin(UCanvas* canvas, const asw_entity* entity) {
 
 void draw_display(UCanvas *canvas)
 {
-	const auto *engine = asw_engine::get();
+	const auto *engine = BATTLE_CObjectManager::get();
 	if (engine == nullptr)
 		return;
 
@@ -482,7 +482,7 @@ const void *vtable_hook(const void **vtable, const int index, const void *hook)
 	return orig;
 }
 
-void throwdebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
+void throwdebug(std::ofstream& f, OBJ_CBase* player, std::string_view tag) {
 	int left, top, right, bottom;
 	player->get_pushbox(&left, &top, &right, &bottom);
 	int width = player->pushbox_width();
@@ -494,7 +494,7 @@ void throwdebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
 	f << tag << "        " << std::setw(18) << bottom << "\n\n";
 }
 
-void afrodebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
+void afrodebug(std::ofstream& f, OBJ_CBase* player, std::string_view tag) {
 	int i = player->hitbox_count + player->hurtbox_count;
 	const auto& extend = player->hitboxes[i];
 	f << tag << " Player, afro, index: " << player->is_player << " " << player->afro << " " << i << "\n";
@@ -503,25 +503,26 @@ void afrodebug(std::ofstream& f, asw_entity* player, std::string_view tag) {
 
 	hitbox afro;
 	afro.type = hitbox::box_type::hurt;
-	afro.h = player->afroH;
-	afro.w = player->afroW;
-	afro.x = extend.x - player->afroW / 2.0;
-	afro.y = extend.y - player->afroH / 2.0;
+	afro.h = static_cast<float>(player->afroH);
+	afro.w = static_cast<float>(player->afroW);
+	afro.x = extend.x - player->afroW / 2.0f;
+	afro.y = extend.y - player->afroH / 2.0f;
 	f << tag << " Calc'd XYWH: " << afro.x << " " << afro.y << " " << afro.w << " " << afro.h << "\n\n";
 }
 
 void dump() {
 	std::ofstream f("hitboxesdump.log");
-	f << "World: " << *GWorld << "\n";
-	f << "GameState: " << (*GWorld)->GameState << "\n";
-	f << "Engine: " << asw_engine::get() << "\n";
-	f << "Scene: " << asw_scene::get() << "\n";
-	f << "Entity count: " << asw_engine::get()->entity_count << "\n";
-	f << "&ents: " << &asw_engine::get()->entities[0] << "\n";
-	auto p1 = asw_engine::get()->players[0].entity;
-	auto p2 = asw_engine::get()->players[1].entity;
-	f << "P1: " << p1 << "\n";
-	f << "P2: " << p2 << "\n\n";
+	f << "World: " << *GWorld << std::endl;
+	f << "GameState: " << (*GWorld)->GameState << std::endl;
+	return;
+	f << "Engine: " << BATTLE_CObjectManager::get() << std::endl;
+	f << "Scene: " << BATTLE_CScreenManager::get() << std::endl;
+	f << "Entity count: " << BATTLE_CObjectManager::get()->entity_count << std::endl;
+	f << "&ents: " << &BATTLE_CObjectManager::get()->entities[0] << std::endl;
+	auto p1 = BATTLE_CObjectManager::get()->m_TeamManagers[0].mainPlayer;
+	auto p2 = BATTLE_CObjectManager::get()->m_TeamManagers[1].mainPlayer;
+	f << "P1: " << p1 << std::endl;
+	f << "P2: " << p2 << "\n" << std::endl;
 
 	//throwdebug(f, p1, "P1");
 	//throwdebug(f, p2, "P2");

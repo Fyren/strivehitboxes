@@ -27,9 +27,6 @@
     <ClCompile Include="arcsys.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bbscript.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="math_util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,16 +44,10 @@
     <ClInclude Include="ue4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bbscript.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="math_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bitmask.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="simulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
