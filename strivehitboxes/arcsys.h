@@ -103,9 +103,9 @@ public:
 	FIELD(0x7A0, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x750 + CAtkParam::m_AtkPushRangeX 0x50
 	FIELD(0x11EC, int, backdash_invuln);
 	FIELD(0x9B6C, int, ply_PushColHeightLowAir);
-	FIELD(0x102A8, int, afro); //OBJ_CCharObj::m_IsAfro
-	FIELD(0x102E0, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColW 0x30
-	FIELD(0x102E4, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColH 0x34
+	FIELD(0x102F8, int, afro); //OBJ_CCharObj::m_IsAfro
+	FIELD(0x10330, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColW 0x30
+	FIELD(0x10334, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColH 0x34
 
 	bool is_active() const;
 	bool is_pushbox_active() const;
