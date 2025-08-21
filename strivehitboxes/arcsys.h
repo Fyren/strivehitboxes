@@ -8,12 +8,12 @@ class AREDGameState_Battle : public AGameState {
 public:
 	static UClass *StaticClass();
 
-	FIELD(0xC30, class BATTLE_CObjectManager*, Engine);
-	FIELD(0xC38, class BATTLE_CScreenManager*, Scene);
+	FIELD(0xC38, class BATTLE_CObjectManager*, Engine);
+	FIELD(0xC40, class BATTLE_CScreenManager*, Scene);
 };
 
 class BATTLE_TeamManager {
-	char pad[0x190];
+	char pad[0x940];
 public:
 	FIELD(0x8, class OBJ_CBase*, mainPlayer); //OBJ_CCharBase* m_pMainPlayerObject
 };
@@ -27,8 +27,8 @@ public:
 	static BATTLE_CObjectManager *get();
 
 	ARRAY_FIELD(0x0, BATTLE_TeamManager[2], m_TeamManagers);
-	FIELD(0x900, int, entity_count); //int m_ActiveObjectCount
-	ARRAY_FIELD(0xC70, class OBJ_CBase*[107], entities); //OBJ_CBase* m_SortedObjPtrVector[107]
+	FIELD(0x910, int, entity_count); //int m_ActiveObjectCount
+	ARRAY_FIELD(0xC80, class OBJ_CBase*[107], entities); //OBJ_CBase* m_SortedObjPtrVector[107]
 };
 
 
@@ -65,6 +65,7 @@ class OBJ_CBase {
 public:
 	FIELD(0x18, bool, is_player);
 	//FIELD(0x44, unsigned char, player_index);
+	FIELD(0x68, char*, m_ColFileName);
 	FIELD(0x78, hitbox*, hitboxes);
 	FIELD(0x10C, int, hurtbox_count);
 	FIELD(0x110, int, hitbox_count);
@@ -101,11 +102,11 @@ public:
 	FIELD(0x794, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMaxY 0x44
 	FIELD(0x79C, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMinY 0x4c
 	FIELD(0x7A0, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x750 + CAtkParam::m_AtkPushRangeX 0x50
-	FIELD(0x11EC, int, backdash_invuln);
-	FIELD(0x9B6C, int, ply_PushColHeightLowAir);
-	FIELD(0x102F8, int, afro); //OBJ_CCharObj::m_IsAfro
-	FIELD(0x10330, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColW 0x30
-	FIELD(0x10334, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x102B0 + ExtendJonParam::m_ColH 0x34
+	FIELD(0x1208, int, backdash_invuln);
+	FIELD(0x9BCC, int, ply_PushColHeightLowAir);
+	FIELD(0x10328, int, afro); //OBJ_CCharObj::m_IsAfro
+	FIELD(0x10360, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x10330 + ExtendJonParam::m_ColW 0x30
+	FIELD(0x10364, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x10330 + ExtendJonParam::m_ColH 0x34
 
 	bool is_active() const;
 	bool is_pushbox_active() const;

@@ -523,6 +523,15 @@ void dump() {
 	f << "P1: " << p1 << std::endl;
 	f << "P2: " << p2 << "\n" << std::endl;
 
+	/*
+	for (auto entidx = BATTLE_CObjectManager::get()->entity_count - 1; entidx >= 0; entidx--) {
+		const auto* entity = BATTLE_CObjectManager::get()->entities[entidx];
+
+		const auto active = entity->is_active();
+		f << "Ent: " << entity << " (" << entity->m_ColFileName << ") " << active << std::endl;
+	}
+	*/
+
 	//throwdebug(f, p1, "P1");
 	//throwdebug(f, p2, "P2");
 
