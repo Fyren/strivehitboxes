@@ -16,7 +16,7 @@ using asw_entity_is_active_t = bool(*)(const OBJ_CBase*, bool);
 const auto asw_entity_is_active = (asw_entity_is_active_t)(
 	sigscan::get().scan("\xF7\x81\x00\x00\x00\x00\x00\x00\x00\x04\x0F", "xx????xxxxx") - 0x12);
 
-//OBJ_CBase::IsObjectToOjbectPushCollisionAvailable()
+//OBJ_CBase::IsObjectToObjectPushCollisionAvailable()
 using asw_entity_is_pushbox_active_t = bool(*)(const OBJ_CBase*);
 const auto asw_entity_is_pushbox_active = (asw_entity_is_pushbox_active_t)(
 	sigscan::get().scan("\xF7\x80\xCC\x5D\x00\x00\x00\x00\x02\x00", "xx????xxxx") - 0x1A);

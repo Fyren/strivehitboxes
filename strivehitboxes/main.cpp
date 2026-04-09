@@ -61,6 +61,8 @@ struct drawn_hitbox {
 		fill.push_back(corners);
 	}
 
+	drawn_hitbox() : type(hitbox::box_type::dummy) {}
+
 	// Clip outlines against another hitbox
 	void clip_lines(const drawn_hitbox &other)
 	{
@@ -231,8 +233,12 @@ void transform_hitbox_point(const UCanvas *canvas, const OBJ_CBase *entity, FVec
 void draw_hitbox(UCanvas *canvas, const OBJ_CBase *entity, const drawn_hitbox &box)
 {
 	FLinearColor color;
-	if (box.type == hitbox::box_type::hit)
+	if (box.type == hitbox::box_type::dummy)
+		return;
+	else if (box.type == hitbox::box_type::hit)
 		color = FLinearColor(1.f, 0.f, 0.f, .25f);
+	else if (box.type == hitbox::box_type::followup)
+		color = FLinearColor(1.f, 0.635f, 0.f, 0.25f);
 	else if (box.type == hitbox::box_type::grab)
 		color = FLinearColor(1.f, 0.f, 1.f, .25f);
 	else if (entity->counterhit)
@@ -292,22 +298,17 @@ hitbox calc_throw_box(const OBJ_CBase *entity)
 	//In the air, the pushbox is offset upwards from the origin.
 	int left, top, right, bottom;
 	entity->get_pushbox(&left, &top, &right, &bottom);
-	/*
-	box.y = (float)(entity->throw_box_bottom + top - entity->pos_y);
-	box.h = (float)(entity->throw_box_top - entity->throw_box_bottom );
-	*/
 	box.y = static_cast<float>(entity->throw_box_bottom + top - bottom - entity->ply_PushColHeightLowAir);
 	box.h = static_cast<float>(entity->throw_box_top - entity->throw_box_bottom - top + bottom);
-	//box.h = 90000;
 	return box;
 }
 
 void draw_hitboxes(UCanvas *canvas, const OBJ_CBase *entity, bool active)
 {
 	const auto count = entity->hitbox_count + entity->hurtbox_count;
-
 	std::vector<drawn_hitbox> hitboxes;
-
+	hitboxes.push_back(drawn_hitbox{});
+	
 	// Collect hitbox info
 	for (auto i = 0; i < count; i++) {
 		const auto &box = entity->hitboxes[i];
@@ -321,14 +322,19 @@ void draw_hitboxes(UCanvas *canvas, const OBJ_CBase *entity, bool active)
 		hitboxes.push_back(drawn_hitbox(box));
 	}
 
+	if (count > 0 && entity->is_player && entity->hitboxes[count + 1].type == hitbox::box_type::followup) {
+		const auto& box = entity->hitboxes[count + 1];
+		hitboxes[0] = drawn_hitbox(box);
+	}
+	
 	//hacky afro hurtbox
-	if (entity->is_player && entity->afro && !entity->is_strike_invuln()) 
+	if (entity->is_player && entity->afro && !entity->is_strike_invuln() && entity->hitboxes[count].type == hitbox::box_type::afro)
 		hitboxes.push_back(calc_afro_box(entity, count));
 
 	// Add throw hitbox if in use
 	if (entity->throw_range >= 0 && active)
 		hitboxes.push_back(calc_throw_box(entity));
-
+	
 	for (auto i = 0; i < hitboxes.size(); i++) {
 		// Clip outlines
 		for (auto j = 0; j < hitboxes.size(); j++) {
@@ -435,7 +441,7 @@ void draw_display(UCanvas *canvas)
 
 		const auto active = entity->is_active();
 		draw_hitboxes(canvas, entity, active);
-
+		
 		const auto *attached = entity->attached;
 		while (attached != nullptr) {
 			draw_hitboxes(canvas, attached, active);

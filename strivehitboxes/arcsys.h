@@ -13,7 +13,7 @@ public:
 };
 
 class BATTLE_TeamManager {
-	char pad[0x940];
+	char pad[0x198];
 public:
 	FIELD(0x8, class OBJ_CBase*, mainPlayer); //OBJ_CCharBase* m_pMainPlayerObject
 };
@@ -48,7 +48,10 @@ public:
 	enum class box_type : int {
 		hurt = 0,
 		hit = 1,
-		grab = 2 // Not used by the game
+		grab = 2, // Not used by the game
+		afro = 17,
+		followup = 18,
+		dummy = -1, //not used by the game
 	};
 
 	box_type type;
@@ -65,10 +68,10 @@ class OBJ_CBase {
 public:
 	FIELD(0x18, bool, is_player);
 	//FIELD(0x44, unsigned char, player_index);
-	FIELD(0x68, char*, m_ColFileName);
+	//FIELD(0x68, char*, m_ColFileName);
 	FIELD(0x78, hitbox*, hitboxes);
-	FIELD(0x10C, int, hurtbox_count);
-	FIELD(0x110, int, hitbox_count);
+	FIELD(0x114, int, hurtbox_count);
+	FIELD(0x118, int, hitbox_count);
 	//   _____    ____    _    _   _   _   _______   ______   _____  
 	//  / ____|  / __ \  | |  | | | \ | | |__   __| |  ____| |  __ \ 
 	// | |      | |  | | | |  | | |  \| |    | |    | |__    | |__) |
@@ -77,36 +80,36 @@ public:
 	//  \_____|  \____/   \____/  |_| \_|    |_|    |______| |_|  \_\ 
 	BIT_FIELD(0x1A8, 0x4000000, cinematic_counter);
 	//FIELD(0x1B0, int, state_frames);
-	FIELD(0x2C0, OBJ_CBase*, opponent);
+	FIELD(0x2C8, OBJ_CBase*, opponent);
 	//FIELD(0x2C8, asw_entity*, parent);
-	FIELD(0x318, OBJ_CBase*, attached);
+	FIELD(0x320, OBJ_CBase*, attached);
 	//BIT_FIELD(0x380, 1, airborne);
-	BIT_FIELD(0x390, 256, counterhit);
-	BIT_FIELD(0x394, 16, strike_invuln);
-	BIT_FIELD(0x394, 32, throw_invuln);
-	BIT_FIELD(0x394, 64, wakeup);
-	FIELD(0x3A4, direction, facing);
-	FIELD(0x3A8, int, pos_x);
-	FIELD(0x3AC, int, pos_y);
-	FIELD(0x3B0, int, pos_z);
-	FIELD(0x3B4, int, angle_x);
-	FIELD(0x3B8, int, angle_y);
-	FIELD(0x3BC, int, angle_z);
-	FIELD(0x3C4, int, scale_x);
-	FIELD(0x3C8, int, scale_y);
-	FIELD(0x3CC, int, scale_z);
+	BIT_FIELD(0x398, 256, counterhit);
+	BIT_FIELD(0x39C, 16, strike_invuln);
+	BIT_FIELD(0x39C, 32, throw_invuln);
+	BIT_FIELD(0x39C, 64, wakeup);
+	FIELD(0x3AC, direction, facing);
+	FIELD(0x3B0, int, pos_x);
+	FIELD(0x3B4, int, pos_y);
+	FIELD(0x3B8, int, pos_z);
+	FIELD(0x3BC, int, angle_x);
+	FIELD(0x3C0, int, angle_y);
+	FIELD(0x3C4, int, angle_z);
+	FIELD(0x3CC, int, scale_x);
+	FIELD(0x3D0, int, scale_y);
+	FIELD(0x3D4, int, scale_z);
 	//FIELD(0x4B8, int, vel_x);
 	//FIELD(0x4BC, int, vel_y);
 	//FIELD(0x4C0, int, gravity);
-	FIELD(0x4FC, int, pushbox_front_offset);
-	FIELD(0x794, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMaxY 0x44
-	FIELD(0x79C, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x750 + CAtkParam::m_AtkRangeMinY 0x4c
-	FIELD(0x7A0, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x750 + CAtkParam::m_AtkPushRangeX 0x50
-	FIELD(0x1208, int, backdash_invuln);
-	FIELD(0x9BCC, int, ply_PushColHeightLowAir);
-	FIELD(0x10328, int, afro); //OBJ_CCharObj::m_IsAfro
-	FIELD(0x10360, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x10330 + ExtendJonParam::m_ColW 0x30
-	FIELD(0x10364, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x10330 + ExtendJonParam::m_ColH 0x34
+	FIELD(0x510, int, pushbox_front_offset);
+	FIELD(0x79C, int, throw_box_top); //OBJ_CCharObj::m_AtkParam 0x758 + CAtkParam::m_AtkRangeMaxY 0x44
+	FIELD(0x7A4, int, throw_box_bottom); //OBJ_CCharObj::m_AtkParam 0x758 + CAtkParam::m_AtkRangeMinY 0x4c
+	FIELD(0x7A8, int, throw_range); //OBJ_CCharObj::m_AtkParam offset 0x758 + CAtkParam::m_AtkPushRangeX 0x50
+	FIELD(0x1220, int, backdash_invuln);
+	FIELD(0x9BDC, int, ply_PushColHeightLowAir);
+	FIELD(0x10360, int, afro); //OBJ_CCharObj::m_IsAfro
+	FIELD(0x10398, int, afroW); //OBJ_CCharOBJ::m_ExtendJon[0] 0x10330 + ExtendJonParam::m_ColW 0x30
+	FIELD(0x1039C, int, afroH); //OBJ_CCharOBJ::m_ExtendJon[0] 0x10330 + ExtendJonParam::m_ColH 0x34
 
 	bool is_active() const;
 	bool is_pushbox_active() const;
